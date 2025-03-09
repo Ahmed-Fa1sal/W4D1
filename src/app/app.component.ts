@@ -2,36 +2,39 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { Todo } from './state/todo.reducer';  // Import Todo interface
+import { Todo } from './state/todo.model';
 import { addTask, deleteTask, toggleTask } from './state/todo.actions';
-import { CommonModule } from '@angular/common';  // Import CommonModule
+import { selectTodos } from './state/todo.selectors';
+import { CommonModule } from '@angular/common';
+
+interface AppState {
+  todos: Todo[];
+}
 
 @Component({
   selector: 'app-root',
-  standalone: true,  // Mark this component as standalone
-  imports: [CommonModule, ReactiveFormsModule],  // Import required modules here
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
   todoForm: FormGroup;
-  tasks$: Observable<Todo[]>;  // Observable for tasks
+  tasks$: Observable<Todo[]>;
 
-  constructor(private fb: FormBuilder, private store: Store<{ todos: Todo[] }>) {
-    // Initialize the form with one control 'description'
+  constructor(private fb: FormBuilder, private store: Store<AppState>) {
     this.todoForm = this.fb.group({
       description: ['', [Validators.required, Validators.minLength(3)]],
     });
 
-    // Select 'todos' state from the store and assign to tasks$
-    this.tasks$ = this.store.select('todos');  // Make sure you're selecting 'todos' correctly
+    // Use selector to get tasks
+    this.tasks$ = this.store.select(selectTodos);
   }
 
-  // Method to add a task
   addTask() {
     if (this.todoForm.valid) {
       const task: Todo = {
-        id: Date.now(),  // Simple id generator
+        id: Date.now(),
         description: this.todoForm.value.description,
         completed: false,
       };
@@ -40,12 +43,10 @@ export class AppComponent {
     }
   }
 
-  // Method to toggle task completion
   toggleTask(id: number) {
     this.store.dispatch(toggleTask({ id }));
   }
 
-  // Method to delete a task
   deleteTask(id: number) {
     this.store.dispatch(deleteTask({ id }));
   }

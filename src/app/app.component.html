@@ -1,4 +1,4 @@
-<div class="app-container">
+<div class="container">
   <h1>To-Do List</h1>
 
   <!-- Add Task Form -->
@@ -6,19 +6,23 @@
     <input
       type="text"
       formControlName="description"
-      placeholder="Enter task"
+      placeholder="Enter a new task..."
+      class="task-input"
     />
     <button type="submit" [disabled]="todoForm.invalid">Add Task</button>
   </form>
 
+  <!-- Display Validation Error -->
+  <p *ngIf="todoForm.controls['description'].invalid && todoForm.controls['description'].touched" class="error">
+    Task description must be at least 3 characters.
+  </p>
   <!-- Task List -->
-  <ul>
-    <li *ngFor="let task of tasks$ | async">
-      <span [class.completed]="task.completed">{{ task.description }}</span>
-      
-      <!-- Buttons for actions -->
-      <button (click)="toggleTask(task.id)">Toggle</button>
-      <button (click)="deleteTask(task.id)">Delete</button>
+  <ul class="task-list">
+    <li *ngFor="let task of tasks$ | async" [class.completed]="task.completed">
+      <span (click)="toggleTask(task.id)">
+        {{ task.description }}
+      </span>
+      <button (click)="deleteTask(task.id)" class="delete-btn">❌</button>
     </li>
   </ul>
 </div>
